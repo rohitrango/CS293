@@ -1,0 +1,33 @@
+
+CS 293
+Data Structures and Algorithms Lab
+Autumn 2016
+
+Lab 1
+-----
+
+The first lab is meant as a C++ referesher and asks you to
+implement a simpe functionality within a class. The class
+specification is provided---basically, a class file that
+initializes and stores an array and provides some custom
+functionality.
+
+The provided files are: myArray.h 
+You should implmented: myArray.cpp
+
+The lab has a set of exercises that incrementally tests 
+the specified functionality of each member function.
+You should checkpoint your implmentation against each
+of the exerice testcases.
+
+The exercise testcases are labeled ex1, ex2 etc. and are
+stored in separate directories.
+Each exercise directory has a main program and a file to
+show reprsentative expected output of the program.
+
+Note: The exercise testcases do not test all the specfied
+functionality, but are meant to test your implementation
+for the provided programs only. Separate testcase will be
+used to check actual correctnesss and handling of cornes
+cases etc.
+
