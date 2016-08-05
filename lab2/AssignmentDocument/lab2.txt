@@ -1,0 +1,46 @@
+
+CS 293
+Data Structures and Algorithms Lab
+Autumn 2016
+
+
+Lab 2. 29.7.16
+-----
+
+In this lab we will implement and test a data structure, the binary search
+tree, which aids in "quick" searching of stored data. 
+The binary search tree, is a tree where all nodes have a single parent
+and two children. Additionally, the binary tree obeys the invariant that
+for every node in the tree, all nodes in its "left" sub-tree are smaller 
+in value and all nodes in the "right" sub-tree are larger in value. The 
+tree is accessed via the root node of the tree.
+
+1. Implement a header file that specificies the class declaration of
+a binary search tree. It should include as private elements all the
+relevant/required data variables and the public member functions provide
+access to functionality and data of the binary search tree nodes.
+
+Following functionality is required:
+- creation of a bst node, 
+- different types of constructors for creation of nodes,
+- addition and deletion of nodes to the tree, 
+- search for a given value in the tree (also output number of steps/comparisons
+  required for search to succeed/fail). (need to provide output format)
+
+2. Provide a rebalance functionality. Given a value, the value should 
+   be first searched in the tree and if a node is found, that node should
+   be converted as 'root' of the tree. Note that this can change the parent-child
+   relations of nodes.
+
+3. Implement the above functionality as a template class. The class should
+   be able to implement values of nodes to be of any of the following
+   data types---char, int, float, double etc.
+4. The 'Assignment Document' attachment also contains all testcases which are published on Bodhitree, so please download it to your local machines. These have been divided into two groups:
+	i) non-templates - (numbered from ex1, ex2,...,ex9) These sections contain the 'main' evaluation codes and outputs only for int data types. Notice that the first 5 are Practice test cases, hence only their output has been attached and not for the remaining exercises (ex6-ex9).
+	ii)templates - (numbered from ex10 onwards) These are datatype-agnostic and verify your usage of template classes. Notice that the first 5 are Practice test cases, hence only their output has been attached and not for the remaining exercises (ex15-ex19 dont have output files attached)
+5. You are required to submit the following four files as ONE tar ball:
+	a) bst.h, bst.cpp relevant for 4.i above
+	b) template_bst.h, template_bst.cpp relevant for 4.ii above
+	Two sample header file declarations have also been provided to you as bst.h and template_bst.h. Please build upon these to create your header files. Do not modify any declarations in these header files, although you may add your own private or public member functions as required by you.  
+
+

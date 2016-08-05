@@ -1,0 +1,100 @@
+
+CS293 Lab3
+
+1. To execute:
+
+Add the following in the cpp for compilation.
+
+template class  datastore<int>;
+template class datastore<float>;
+template class  datastore<char>;
+
+Sample execution command:
+
+cat <inputfile> | ./a.out >> <outputfile>
+
+
+2. Input file format 
+--------------------
+
+
+i <space> <number of elements to insert> <space> <space separated values to be inserted> 
+e.g., 
+i 5 1 12 23 34 4
+insert 5 elements (1, 12, 23, 34, 4) to the list.
+
+p
+print the data store
+e.g.,
+1 2 3
+4 1 4
+Data items with count 1 are 2 and 3, data items with count 4 are 1 and 4.
+The first column is the count from the count nodes followed by data items 
+with corresponding count values (#occurrences/insertions so far).
+
+
+d <space> <value to be decremented>
+e.g.,
+d 5
+decrement count by 1 of data item 5
+
+
+s <space> <value to be searched>
+e.g.,
+s 4
+search for value 4 in the date store. if found return count of occurrences, else return -1
+
+
+m
+find the maximum count (occurrences) across all data items
+
+
+l
+list all data items that have the maximum count
+<maxcount> <list of data items>
+e.g.,
+5 3 2 1
+Maximum count of ocurrences is 5 and it is for data items 3, 2 and 1.
+
+
+z
+list all data items that have access count of zero
+
+
+r
+reset the count of all items in the data store to zero
+
+
+c <count>
+list all data items with specified access count 
+<count> <list of data items>
+
+
+x <space> <value>
+index corresponding to value
+return pointer to count_list node corresponding to the value, else return NULL 
+
+
+e <space> <value>
+eject/remove the date item with the given value from datastore. 
+return 1 for success, 0 for failure (if value not found)
+
+
+q
+all input over, quit.
+
+
+
+3. Output format
+----------------
+
+print
+<count> <space> <space separated numbers which occur 'count' number of times>
+
+list_max
+<space separated values which occur the most number of times>
+
+list_zero
+<space separated values which have been reset i.e. count = 0>
+
+

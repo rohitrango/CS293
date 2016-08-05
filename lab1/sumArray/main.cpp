@@ -17,7 +17,8 @@ myArray B(5);
 for(int i=0;i<5;i++)
 	B.addToArray(i+1);
 
-myArray C = A+B;
+myArray C;
+C = A+B;
 
 A.printArray();
 B.printArray();

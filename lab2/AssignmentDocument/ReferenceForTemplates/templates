@@ -1,0 +1,996 @@
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" Content="Microsoft Developer Studio">
+<META HTTP-EQUIV="Content-Type" content="text/html; charset=iso-8859-1">
+<META NAME="DESCRIPTION" CONTENT="Visual C++ Library - C++ Templates Tutorial">
+<LINK TITLE="" REL=stylesheet
+HREF="stylesheets/style1.css"
+TYPE="text/css">
+<TITLE>C++ Templates Tutorial</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<!--TOOLBAR_START-->
+<!--TOOLBAR_EXEMPT-->
+<!--TOOLBAR_END-->
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=99%>
+<TR VALIGN=TOP>
+<TD WIDTH=280><H1>C++ Templates Tutorial</H1></TD>
+<TD ALIGN=RIGHT>
+<A HREF="default.htm" TARGET="_top">C++ Library</A>&nbsp;&nbsp;<BR>
+</TD>
+</TR>
+</TABLE> 
+
+&nbsp; <BR>
+
+<HR>
+<H2 ><i>Table of Contents</i></H2>
+<H2><A HREF="#T1" TARGET="MAIN">Introduction</A></H2>
+<H2><A HREF="#T2" TARGET="MAIN">Class Templates</A></H2>
+<UL>
+<LI><B><A HREF="#T3" TARGET="MAIN">Implementing a class template</A></B>
+<LI><B><A HREF="#T4" TARGET="MAIN">Implementing class template members</A></B>
+<LI><B><A HREF="#T5" TARGET="MAIN">Using a class template</A></B>
+</UL>
+<H2><A HREF="#T6" TARGET="MAIN">Function Templates</A></H2>
+<UL>
+<LI><B><A HREF="#T7" TARGET="MAIN">Implementing Template Functions</A></B>
+<LI><B><A HREF="#T8" TARGET="MAIN">Using Template Functions</A></B>
+</UL>
+<H2><A HREF="#T9" TARGET="MAIN">Template Instantiation</A></H2>
+<H2><A HREF="#T10">Class Template Specialization</A></H2>
+<UL>
+<LI><B><A HREF="#T11" TARGET="MAIN">Template Class Partial Specialization</A></B>
+</UL>
+<H2><A HREF="#T12" TARGET="MAIN">Template Function Specialization</A></H2>
+<H2><A HREF=#T13" TARGET="MAIN">Template Parameters</A></H2>
+<H2><A HREF="#T14" TARGET="MAIN">Static Members and Variables</A></H2>
+<H2><A HREF="#T15" TARGET="MAIN">Templates and Friends</A></H2>
+<HR>
+<H1><A NAME="T1">Introduction</A></H1>
+
+<P>Many C++ programs use common data structures like stacks, queues and lists.  A program may require a queue of customers 
+and a queue of messages.  One could easily implement a queue of customers, then take the existing code and implement a queue of messages.  
+The program grows, and now there is a need for a queue of orders.  So just take the queue of messages and 
+convert that to a queue of orders (Copy, paste, find, replace????).  Need to make some changes to the queue implementation?  
+Not a very easy task, since the code has been duplicated in many places.   Re-inventing source code is not an intelligent 
+approach in an object oriented environment which encourages re-usability.  It seems to make more sense to implement a queue 
+that can contain any arbitrary type rather than duplicating code. How does one do that?  The answer is to use type parameterization, 
+more commonly referred to as templates.
+
+<P>C++ templates allow one to implement a generic Queue&ltT&gt template that has a type parameter T.  
+T can be replaced with actual types, for example, Queue&ltCustomers&gt, and C++ will generate the class Queue&ltCustomers&gt.  
+Changing the implementation of the Queue becomes relatively simple.  Once the changes are implemented in the template Queue&ltT&gt, 
+they are immediately reflected in the classes Queue&ltCustomers&gt, Queue&ltMessages&gt, and Queue&ltOrders&gt.
+
+<P>Templates are very useful when implementing generic constructs like vectors, stacks, lists, 
+queues which can be used with any arbitrary type.  C++ templates provide a way to re-use source code as opposed to 
+inheritance and composition which provide a way to re-use object code.  
+
+<P>C++ provides two kinds of templates: class templates and function templates.  Use function templates to write generic 
+functions that can be used with arbitrary types.  For example, one can write searching and sorting routines which can be used 
+with any arbitrary type.  The Standard Template Library generic algorithms have been implemented as function templates, 
+and the containers have been implemented as class templates.
+
+<H1><A NAME="T2">Class Templates</A></H1>
+
+<H2><A NAME="T3">Implementing a class template</A></H2>
+
+<P>A class template definition looks like a regular class definition, except it is prefixed by the 
+keyword template.  For example, here is the definition of a class template for a Stack.
+<PRE>
+template &ltclass T&gt
+class Stack
+{
+public:
+	Stack(int = 10) ; 
+	~Stack() { delete [] stackPtr ; }
+	int push(const T&); 
+	int pop(T&) ;  
+	int isEmpty()const { return top == -1 ; } 
+	int isFull() const { return top == size - 1 ; } 
+private:
+	int size ;  // number of elements on Stack.
+	int top ;  
+	T* stackPtr ;  
+} ;
+</PRE>
+
+<P>T is a type parameter and it can be any type.  For example, Stack&ltToken&gt, where Token is a user defined class.  T does not have to be a class type as implied by the keyword class.  For example, Stack&ltint&gt and Stack&ltMessage*&gt are valid instantiations, even though int and Message* are not "classes".
+
+<H2><A NAME="T4">Implementing class template member functions</A></H2>
+
+<P>Implementing template member functions is somewhat different compared to the regular class member functions.  
+The declarations and definitions of the class template member functions should all be in the same header file.  
+The declarations and definitions need to be in the same header file.  Consider the following.
+
+<BR><BR>
+
+<TABLE COLS=3 BORDER=1 CELLPADDING=5>
+<TR>
+<TD>
+<PRE>
+//B.H
+template &ltclass t&gt
+class b
+{
+public:
+	b() ;
+	~b() ;
+} ;
+</PRE>
+</TD>
+<TD>
+<PRE>
+// B.CPP
+#include "B.H"
+template &ltclass t&gt
+b&ltt&gt::b()
+{
+}
+template &ltclass t&gt
+b&ltt&gt::~b()
+{
+}
+</PRE>
+</TD>
+<TD>
+<PRE>
+//MAIN.CPP
+#include "B.H"
+void main()
+{
+	 b&ltint&gt bi ;
+	 b &ltfloat&gt bf ;
+}
+</PRE>
+</TD>
+</TR>
+</TABLE>
+
+<P>When compiling B.cpp, the compiler has both the declarations and the definitions available.  At this point 
+the compiler does not need to generate any definitions for template classes, since there are no instantiations.  
+When the compiler compiles main.cpp, there are two instantiations: template class B&ltint&gt and B&ltfloat&gt.  
+At this point the compiler has the declarations but no definitions!
+
+<P>While implementing class template member functions, the definitions are prefixed by the keyword template.  
+Here is the complete implementation of class template Stack:
+
+<PRE>
+//stack.h
+#pragma once
+template &ltclass T&gt
+class Stack
+{
+public:
+	Stack(int = 10) ; 
+	~Stack() { delete [] stackPtr ; }
+	int push(const T&); 
+	int pop(T&) ;  // pop an element off the stack
+	int isEmpty()const { return top == -1 ; } 
+	int isFull() const { return top == size - 1 ; } 
+private:
+	int size ;  // Number of elements on Stack
+	int top ;  
+	T* stackPtr ;  
+} ;
+
+//constructor with the default size 10
+template &ltclass T&gt
+Stack&ltT&gt::Stack(int s)
+{
+	size = s &gt 0 && s &lt 1000 ? s : 10 ;  
+	top = -1 ;  // initialize stack
+	stackPtr = new T[size] ; 
+}
+ // push an element onto the Stack 
+template &ltclass T&gt
+int Stack&ltT&gt::push(const T& item)
+{
+	if (!isFull())
+	{
+		stackPtr[++top] = item ;
+		return 1 ;  // push successful
+	}
+	return 0 ;  // push unsuccessful
+}
+
+// pop an element off the Stack
+template &ltclass T&gt 
+int Stack&ltT&gt::pop(T& popValue) 
+{
+	if (!isEmpty())
+	{
+		popValue = stackPtr[top--] ;
+		return 1 ;  // pop successful
+	}
+	return 0 ;  // pop unsuccessful
+}
+</PRE>
+
+<H2><A NAME="T5">Using a class template</A></H2>
+
+<P>Using a class template is easy.  Create the required classes by plugging in the actual type for the type parameters.  
+This process is commonly known as "Instantiating a class".  Here is a sample driver class that uses the Stack class template.
+
+<PRE>
+#include &ltiostream&gt
+#include "stack.h"
+using namespace std ;
+void main()
+{
+	typedef Stack&ltfloat&gt FloatStack ;
+	typedef Stack&ltint&gt IntStack ;
+
+	FloatStack fs(5) ;
+	float f = 1.1 ;
+	cout &lt&lt "Pushing elements onto fs" &lt&lt endl ;
+	while (fs.push(f))
+	{
+		cout &lt&lt f &lt&lt ' ' ;
+		f += 1.1 ;
+	}
+	cout &lt&lt endl &lt&lt "Stack Full." &lt&lt endl
+	&lt&lt endl &lt&lt "Popping elements from fs" &lt&lt endl ;
+	while (fs.pop(f))
+		cout &lt&lt f &lt&lt ' ' ;
+	cout &lt&lt endl &lt&lt "Stack Empty" &lt&lt endl ;
+	cout &lt&lt endl ;
+
+	IntStack is ;
+	int i = 1.1 ;
+	cout &lt&lt "Pushing elements onto is" &lt&lt endl ;
+	while (is.push(i))
+	{
+		cout &lt&lt i &lt&lt ' ' ;
+		i += 1 ;
+	}
+	cout &lt&lt endl &lt&lt "Stack Full" &lt&lt endl
+	&lt&lt endl &lt&lt "Popping elements from is" &lt&lt endl ;
+	while (is.pop(i))
+			cout &lt&lt i &lt&lt ' ' ;
+	cout &lt&lt endl &lt&lt "Stack Empty" &lt&lt endl ;
+}
+</PRE>
+
+<H3>Program Output</H3>
+<PRE>
+Pushing elements onto fs
+1.1 2.2 3.3 4.4 5.5 
+Stack Full.
+
+Popping elements from fs
+5.5 4.4 3.3 2.2 1.1 
+Stack Empty
+
+Pushing elements onto is
+1 2 3 4 5 6 7 8 9 10 
+Stack Full
+
+Popping elements from is
+10 9 8 7 6 5 4 3 2 1 
+Stack Empty
+</PRE>
+
+<P>In the above example we defined a class template Stack. In the driver program we instantiated a Stack of float (FloatStack) and a Stack of int(IntStack). Once the template classes are instantiated you can instantiate objects of that type (for example, fs and is.) 
+
+<P>A good programming practice is using typedef while instantiating template classes. Then throughout the program, one can use the typedef name. There are two advantages:
+<UL>
+	<LI>
+	<B>typedef's</B> are very useful when "templates of templates" come into usage.  For example, when instantiating an STL vector of int's, you could use:
+	<PRE>
+		 typedef vector&ltint, allocator&ltint&gt &gt INTVECTOR ; 
+	</PRE>
+	
+
+	<LI>If the template definition changes, simply change the typedef definition.  For example, currently the definition of template class vector requires a second parameter.
+	<PRE>
+		typedef vector&ltint, allocator&ltint&gt &gt INTVECTOR ;
+		INTVECTOR vi1 ;
+	</PRE>
+	In a future version, the second parameter may not be required, for example,
+	<PRE>
+		typedef vector&ltint&gt INTVECTOR ;
+		INTVECTOR vi1 ;
+	</PRE>
+	
+</UL>
+<P>Imagine how many changes would be required if there was no <B>typedef</B>!
+
+<H1><A NAME="T6">Function Templates</A></H1>
+
+<P>To perform identical operations for each type of data compactly and conveniently, use function templates. You can write a single function template definition. Based on the argument types provided in calls to the function, the compiler automatically instantiates separate object code functions to handle each type of call appropriately.  The STL algorithms are implemented as function templates.
+
+<H2><A NAME="T7">Implementing Template Functions</A></H2>
+
+<P>Function templates are implemented like regular functions, except they are prefixed with the keyword template. Here is a sample with a function template.
+
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+//max returns the maximum of the two elements
+template &ltclass T&gt
+T max(T a, T b)
+{
+	return a &gt b ? a : b ;
+}
+</PRE>
+
+<H2><A NAME="T8">Using Template Functions</A></H2>
+
+<P>Using function templates is very easy: just use them like regular functions.  When the compiler sees an instantiation of the function template, for example: the call max(10, 15) in function main, the compiler generates a function max(int, int).  Similarly the compiler generates definitions for max(char, char) and max(float, float) in this case.
+
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+//max returns the maximum of the two elements
+template &ltclass T&gt
+T max(T a, T b)
+{
+	return a &gt b ? a : b ;
+}
+void main()
+{
+   
+	cout &lt&lt "max(10, 15) = " &lt&lt max(10, 15) &lt&lt endl ;
+	cout &lt&lt "max('k', 's') = " &lt&lt max('k', 's') &lt&lt endl ;
+	cout &lt&lt "max(10.1, 15.2) = " &lt&lt max(10.1, 15.2) &lt&lt endl ;
+}
+</PRE>
+<H3>Program Output</H3>
+<PRE>
+max(10, 15) = 15
+max('k', 's') = s
+max(10.1, 15.2) = 15.2
+</PRE>
+
+<H1><A NAME="T9">Template Instantiation</A></H1>
+
+<P>When the compiler generates a class, function or static data members from a template, it is referred to as template instantiation.
+
+<UL>
+	<LI>A class generated from a class template is called a generated class.
+	
+	<LI>A function generated from a function template is called a generated function.
+
+	<LI>A static data member generated from a static data member template is called a generated static data member.
+	
+</UL>
+
+<P>The compiler generates a class, function or static data members from a template when it sees an 
+implicit instantiation or an explicit instantiation of the template.
+
+<OL>
+<LI>Consider the following sample.  This is an example of implicit instantiation of a class template.
+<PRE>
+template &ltclass T&gt
+class Z
+{
+  public:
+Z() {} ;
+~Z() {} ;
+void f(){} ;
+void g(){} ;
+} ;
+
+int main()
+{
+Z&ltint&gt zi ;   //implicit instantiation generates class Z&ltint&gt
+Z&ltfloat&gt zf ; //implicit instantiation generates class Z&ltfloat&gt
+return 0 ;
+}
+</PRE>
+
+<LI>Consider the following sample.  This sample uses the template class members Z&ltT&gt::f() and Z&ltT&gt::g().
+<PRE>
+template &ltclass T&gt
+class Z
+{
+  public:
+Z() {} ;
+~Z() {} ;
+void f(){} ;
+void g(){} ;
+} ;
+
+int main()
+{
+Z&ltint&gt zi ; //implicit instantiation generates class Z&ltint&gt
+zi.f() ;    //and generates function Z&ltint&gt::f()
+Z&ltfloat&gt zf ; //implicit instantiation generates class Z&ltfloat&gt
+zf.g() ;      //and generates function Z&ltfloat&gt::g()
+return 0 ;
+}
+</PRE>
+<P>This time in addition to the generating classes Z&ltint&gt and Z&ltfloat&gt, with constructors and destructors, the compiler also generates definitions for Z&ltint&gt::f() and Z&ltfloat&gt::g().  The compiler does not generate definitions for functions, nonvirtual member functions, class or member class that does not require instantiation.  In this example, the compiler did not generate any definitions for Z&ltint&gt::g() and Z&ltfloat&gt::f(), since they were not required.
+<P>
+<LI>Consider the following sample.  This is an example of explicit instantiation of a class template.
+<PRE>
+template &ltclass T&gt
+class Z
+{
+  public:
+Z() {} ;
+~Z() {} ;
+void f(){} ;
+void g(){} ;
+} ;
+
+int main()
+{
+template class Z&ltint&gt ; //explicit instantiation of class Z&ltint&gt
+template class Z&ltfloat&gt ; //explicit instantiation of 
+                          //class Z&ltfloat&gt
+return 0 ;
+}
+</PRE>
+
+<LI>Consider the following sample.  Will the compiler generate any classes in this case?  The answer is NO.
+<PRE>
+template &ltclass T&gt
+class Z
+{
+  public:
+Z() {} ;
+~Z() {} ;
+void f(){} ;
+void g(){} ;
+} ;
+
+int main()
+{
+Z&ltint&gt* p_zi ; //instantiation of class Z&ltint&gt not required
+Z&ltfloat&gt* p_zf ; //instantiation of class Z&ltfloat&gt not required
+return 0 ;
+}
+</PRE>
+<P>This time the compiler does not generate any definitions!  There is no need for any definitions.  It is similar to declaring a pointer to an undefined class or struct.
+<P>
+
+<LI>Consider the following sample.  This is an example of implicit instantiation of a function template.
+<PRE>
+//max returns the maximum of the two elements
+template &ltclass T&gt
+T max(T a, T b)
+{
+    return a &gt b ? a : b ;
+}
+void main()
+{
+int I ;
+I = max(10, 15) ; //implicit instantiation of max(int, int)
+char c ;
+c = max('k', 's') ; //implicit instantiation of max(char, char)
+}
+</PRE>
+<P>In this case the compiler generates functions max(int, int) and max(char, char). The compiler generates definitions using the template function max. 
+<P>
+
+<LI>Consider the following sample.  This is an example of explicit instantiation of a function template.
+<PRE>
+template &ltclass T&gt
+void Test(T r_t)
+{
+}
+
+int main()
+{
+//explicit instantiation of Test(int)
+	template void Test&ltint&gt(int) ;
+	return 0 ;
+}
+</PRE>
+<B>NOTE</B>: Visual C++ 5.0 does not support this syntax currently.  The above sample causes compiler error C1001.
+<P>In this case the compiler would generate function Test(int). The compiler generates the definition using the template function Test.
+<P>
+
+<LI>If an instantiation of a class template is required, and the template declared but not defined, the program is ill-formed.  VC5.0 compiler generates error C2079.
+<PRE>
+template &ltclass T&gt class X ;
+
+int main()
+{
+	X&ltint&gt xi ; //error C2079: 'xi' uses undefined class 'X&ltint&gt'
+	return 0 ;
+}
+</PRE>
+
+<LI>Instantiating virtual member functions of a class template that does not require instantiation is implementation defined.  For example, in the following sample, virtual function X&ltT&gt::Test() is not required, VC5.0 generates a definition for X&ltT&gt::Test.
+<PRE>
+template &ltclass T&gt 
+class X 
+{
+	public:
+		virtual void Test() {} 
+};
+
+int main()
+{
+	X&ltint&gt xi ; //implicit instantiation of X&ltint&gt
+	return 0 ;
+}
+</PRE>
+<P>In this case the compiler generates a definition for X&ltint&gt::Test, even if it is not required.
+</OL>
+
+<H1><A NAME="T10">Class Template Specialization</A></H1>
+<P>In some cases it is possible to override the template-generated code by providing special definitions for specific types.  
+This is called template specialization.  The following example defines a template class specialization for template class stream.
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+
+template &ltclass T&gt
+class stream
+{
+	public:
+		void f() { cout &lt&lt "stream&ltT&gt::f()"&lt&lt endl ;}
+} ;
+
+template &lt&gt
+class stream&ltchar&gt
+{
+	public:
+		void f() { cout &lt&lt "stream&ltchar&gt::f()"&lt&lt endl ;}
+} ;
+
+int main()
+{
+	stream&ltint&gt si ;
+	stream&ltchar&gt sc ;
+
+	si.f() ;
+	sc.f() ;
+	
+	return 0 ;
+}
+</PRE>
+<H3>Program Output</H3>
+<PRE>
+stream&ltT&gt::f()
+stream&ltchar&gt::f()
+</PRE>
+<P>In the above example, stream&ltchar&gt is used as the definition of streams of chars; 
+other streams will be handled by the template class generated from the class template.
+
+<H2><A NAME="T11">Template Class Partial Specialization</A></H2>
+<P>You may want to generate a specialization of the class for just one parameter, for example
+<PRE>
+//base template class
+template&lttypename T1, typename T2&gt 
+class X 
+{
+} ;
+
+//partial specialization
+template&lttypename T1&gt 
+class X&ltT1, int&gt 
+{
+} ; //C2989 here
+
+int main()
+{
+	// generates an instantiation from the base template
+	X&ltchar, char&gt xcc ; 
+	
+	//generates an instantiation from the partial specialization
+X&ltchar, int&gt xii ;  
+
+	return 0 ;
+}
+</PRE>
+<P>A partial specialization matches a given actual template argument list if the template arguments of the partial specialization can be deduced from the actual template argument list.
+
+<P><B>NOTE</B>: Visual C++ 5.0 does not support template class partial specialization.  The above sample causes compiler error C2989: template class has already been defined as a non-template class.
+
+<H1><A NAME="T12">Template Function Specialization</A></H1>
+
+<P>In some cases it is possible to override the template-generated code by providing special definitions for specific types.  This is called template specialization.  The following example demonstrates a situation where overriding the template generated code would be necessary:
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+
+//max returns the maximum of the two elements of type T, where T is a
+//class or data type for which operator&gt is defined.
+template &ltclass T&gt
+T max(T a, T b)
+{
+    return a &gt b ? a : b ;
+}
+
+int main()
+{    
+    cout &lt&lt "max(10, 15) = " &lt&lt max(10, 15) &lt&lt endl ;
+    cout &lt&lt "max('k', 's') = " &lt&lt max('k', 's') &lt&lt endl ;
+    cout &lt&lt "max(10.1, 15.2) = " &lt&lt max(10.1, 15.2) &lt&lt endl ;
+    cout &lt&lt "max(\"Aladdin\", \"Jasmine\") = " &lt&lt max("Aladdin", "Jasmine") &lt&lt endl ;
+    return 0 ;
+}
+</PRE>
+
+<H3>Program Output</H3>
+<PRE>
+max(10, 15) = 15
+max('k', 's') = s
+max(10.1, 15.2) = 15.2
+max("Aladdin", "Jasmine") = Aladdin
+</PRE>
+
+<P>Not quite the expected results!  Why did that happen?  The function call max("Aladdin", "Jasmine") causes the compiler to generate code for max(char*, char*), which compares the addresses of the strings!  To correct special cases like these or to provide more efficient implementations for certain types, one can use template specializations.  The above example can be rewritten with specialization as follows:
+<PRE>
+#include &ltiostream&gt
+#include &ltcstring&gt
+using namespace std ;
+
+//max returns the maximum of the two elements
+template &ltclass T&gt
+T max(T a, T b)
+{
+    return a &gt b ? a : b ;
+}
+
+// Specialization of max for char*
+template &lt&gt
+char* max(char* a, char* b)
+{
+    return strcmp(a, b) &gt 0 ? a : b ;
+}
+
+int main()
+{
+    
+    cout &lt&lt "max(10, 15) = " &lt&lt max(10, 15) &lt&lt endl ;
+    cout &lt&lt "max('k', 's') = " &lt&lt max('k', 's') &lt&lt endl ;
+    cout &lt&lt "max(10.1, 15.2) = " &lt&lt max(10.1, 15.2) &lt&lt endl ;
+    cout &lt&lt "max(\"Aladdin\", \"Jasmine\") = " &lt&lt max("Aladdin", "Jasmine") &lt&lt endl ;
+    return 0 ;
+}
+</PRE>
+<H3>Program Output</H3>
+<PRE>
+max(10, 15) = 15
+max('k', 's') = s
+max(10.1, 15.2) = 15.2
+max("Aladdin", "Jasmine") = Jasmine
+</PRE>
+
+<H1><A NAME="T13">Template Parameters</A></H1>
+
+<OL>
+
+<LI>C++ templates allow one to implement a generic Queue&ltT&gt template that has a type parameter T.  
+T can be replaced with actual types, for example, Queue&ltCustomers&gt, and C++ will generate the class Queue&ltCustomers&gt.  
+For example,
+<PRE>
+template &ltclass T&gt
+class Stack
+{
+} ;
+</PRE>
+<P>Here T is a template parameter, also referred to as type-parameter.
+<P>
+
+<LI>C++ allows you to specify a default template parameter, so the definition could now look like:
+<PRE>
+	template &ltclass T = float, int elements = 100&gt Stack { ....} ;
+</PRE>
+<P>Then a declaration such as
+<PRE>
+	Stack&lt&gt mostRecentSalesFigures ;	
+</PRE>
+<P>would instantiate (at compile time) a 100 element Stack template class named mostRecentSalesFigures of float values; this template class would be of type Stack&ltfloat, 100&gt. 
+
+<P>Note, C++ also allows non-type template parameters.  In this case, template class Stack has an int as a non-type parameter.
+
+<P><B>If you specify a default template parameter for any formal parameter, the rules are the same as for functions and default parameters.  Once a default parameter is declared all subsequent parameters must have defaults.</B>
+<P>
+
+<LI>Default arguments cannot be specified in a declaration or a definition of a specialization.  For example,
+<PRE>
+template &ltclass T, int size&gt
+class Stack
+{
+} ;
+
+//error C2989: 'Stack&ltint,10&gt' : template class has already been
+//defined as a non-template class
+template &ltclass T, int size = 10&gt
+class Stack&ltint, 10&gt
+{
+} ;
+
+int main()
+{
+	Stack&ltfloat,10&gt si ;
+              return 0 ;
+}
+</PRE>
+<P>
+
+<LI>A type-parameter defines its identifier to be a type-name in the scope of the template declaration, and canot be re-declared within its scope (including nested scopes).  For example,
+<PRE>
+template &ltclass T, int size&gt
+class Stack
+{
+	int T ; //error type-parameter re-defined.
+	void f()
+	{
+		char T ; //error type-parameter re-defined.
+	}
+} ;
+
+class A {} ;
+int main()
+{
+	Stack&ltA,10&gt si ;
+       return 0 ;
+}
+</PRE>
+<P><B>NOTE</B>: VC++ 5.0 or SP1 compiles this sample without any errors.  It does not flag the re-definition of type-parameter as an error.
+<P>
+
+<LI>The value of a non-type-parameter cannot be assigned to or have its value changed.  For example,
+<PRE>
+template &ltclass T, int size&gt
+class Stack
+{
+	void f()
+	{
+		//error C2105: '++' needs l-value             
+             size++ ; //error change of template argument value
+	}
+} ;
+
+
+int main()
+{
+	Stack&ltdouble,10&gt si ;
+       return 0 ;
+}
+</PRE>
+
+<LI>A template-parameter that could be interpreted as either a parameter-declaration or a type-parameter, is taken as a type-parameter.  For example,
+<PRE>
+class T {} ;
+int i ;
+
+template &ltclass T, T i&gt
+void f(T t)
+{
+	T t1 = i ; //template arguments T and i
+	::T t2 = ::i ; //globals T and i 
+} 
+
+
+
+int main()
+{
+	f('s') ; //C2783 here
+	return 0 ;
+}
+</PRE>
+<P><B>NOTE</B>: Compiling the above sample using VC++ 5.0 and SP1 causes compiler error C2783: could not deduce template argument for 'i'.  To workaround the problem, replace the call to f('s') with f&ltchar, 's'&gt('s').
+<PRE>
+class T {} ;
+int i ;
+
+template &ltclass T, T i&gt
+void f(T t)
+{
+	T t1 = i ; //template arguments T and i
+	::T t2 = ::i ; //globals T and i 
+} 
+
+int main()
+{
+	f&ltchar, 's'&gt('s') ; //workaround
+	return 0 ;
+}
+</PRE>
+
+<LI>A non-type template parameter cannot be of floating type.  For example,
+<PRE>
+template &ltdouble d&gt class X ; //error C2079: 'xd' uses 
+                              //undefined class 'X&lt1.e66&gt'
+//template &ltdouble* pd&gt class X ; //ok
+//template &ltdouble& rd&gt class X ; //ok
+
+int main()
+{
+	X&lt1.0&gt xd ;
+	return 0 ;
+}
+</PRE>
+</OL>
+
+<H1><A NAME="T14">Static Members and Variables</A></H1>
+<OL>
+
+<LI>Each template class or function generated from a template has its own copies of any static variables or members.
+<P>
+<LI>Each instantiation of a function template has it's own copy of any static variables defined within the scope of the function.  
+For example,
+<PRE>
+template &ltclass T&gt
+class X
+{
+    public:
+	static T s ;
+} ;
+
+int main()
+{
+	X&ltint&gt xi ;
+       X&ltchar*&gt xc ;
+}
+</PRE>
+<P>Here X&ltint&gt has a static data member s of type int and X&ltchar*&gt has a static data member s of type char*.
+<P>
+<LI>Static members are defined as follows.
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+
+template &ltclass T&gt
+class X
+{
+    public:
+	static T s ;
+} ;
+
+template &ltclass T&gt T X&ltT&gt::s = 0 ;
+template &lt&gt int X&ltint&gt::s = 3 ;
+template &lt&gt char* X&ltchar*&gt::s = "Hello" ;
+
+int main()
+{
+	X&ltint&gt xi ;
+	cout &lt&lt "xi.s = " &lt&lt xi.s &lt&lt endl ;
+
+       X&ltchar*&gt xc ;
+	cout &lt&lt "xc.s = " &lt&lt xc.s &lt&lt endl ;
+	
+	return 0 ;
+}
+</PRE>
+<H3>Program Output</H3>
+<PRE>
+xi.s = 10
+xc.s = Hello
+</PRE>
+
+<LI>Each instantiation of a function template has it's own copy of the static variable.  For example,
+<PRE>
+#include &ltiostream&gt
+using namespace std ;
+
+template &ltclass T&gt
+void f(T t)
+{
+	static T s  = 0;
+	s = t ;
+	cout &lt&lt "s = " &lt&lt s &lt&lt endl ;
+} 
+
+int main()
+{
+	f(10) ;
+	f("Hello") ;
+	
+	return 0 ;
+}
+</PRE>
+<H3>Program Output</H3>
+<PRE>
+s = 10
+s = Hello
+</PRE>
+<P>Here f&ltint&gt(int) has a static variable s of type int, and f&ltchar*&gt(char*) has a static variable s of type char*.
+</OL>
+
+<H1><A NAME="T15">Templates and Friends</A></H1>
+<P>Friendship can be established between a class template and a global function, a member function of another class (possibly a template class), or even an entire class (possible template class). The table below lists the results of declaring different kinds of friends of a class.
+<P>
+<TABLE COLS=3 BORDER=1 CELLPADDING=5>
+<TR>
+<TD ALIGN="center">
+<B>Class Template</B>
+</TD>
+
+<TD ALIGN="center">
+<B>friend declaration in class template X</B>
+</TD>
+
+<TD ALIGN="center">
+<B>Results of giving friendship</B>
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend void f1() ;
+</TD>
+
+<TD>
+makes f1() a friend of all instantiations of template X.  For example, f1() is a friend of X&ltint&gt, X&ltA&gt, and X&ltY&gt.
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend void f2(X&ltT&gt&) ;
+</TD>
+
+<TD>
+For a particular type T for example, float, makes f2(X&ltfloat&gt&) a friend of class X&ltfloat&gt only.  f2(x&ltfloat&gt&) cannot be a friend of class X&ltA&gt.
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend A::f4() ;   // A is a user defined class with a member function f4() ;
+</TD>
+
+<TD>
+makes A::f4() a friend of all instantiations of template X.  For example, A::f4() is a friend of X&ltint&gt, X&ltA&gt, and X&ltY&gt.
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend C&ltT&gt::f5(X&ltT&gt&) ; // C is a class template with a member function f5
+</TD>
+
+<TD>
+For a particular type T for example, float, makes C&ltfloat&gt::f5(X&ltfloat&gt&) a friend of class X&ltfloat&gt only.  C&ltfloat&gt::f5(x&ltfloat&gt&) cannot be a friend of class X&ltA&gt.
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend class Y ;
+</TD>
+
+<TD>
+makes every member function of class Y a friend of every template class produced from the class template X.
+</TD>
+</TR>
+
+<TR>
+<TD>
+template class &ltT&gt class X
+</TD>
+
+<TD>
+friend class Z&ltT&gt ;
+</TD>
+
+<TD>
+when a template class is instantiated with a particular type T, such as a float, all members of class Z&ltfloat&gt become friends of template class X&ltfloat&gt.
+</TD>
+</TR>
+</TABLE>
+<HR>
+&#169; 1997 Microsoft Corporation.  All rights reserved. Terms of Use.
+</BODY>
+</HTML>
