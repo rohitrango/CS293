@@ -1,0 +1,167 @@
+﻿
+CS293
+Data Structures and Algorithms Lab
+Autumn 2016
+ 
+ 
+Lab #7.  
+16.09.2016
+ 
+Maybe or maybe not!  
+Bloom filter, a probabilistic data structure.
+--------------------------------------------
+ 
+All data structures that we have studied so far have preserved data stored
+in them and have reliably offered them when asked for. In this lab, we  
+study a data structure that does not adhere to this condition, and is
+probabilistic. With a small probability, a data item added to the data structure  
+might not be available later (false negatives) and with a small probability a data
+item may be found in the data structure even without being added
+to the data structure (false positives). The advantage of the bloom filter (to tradeoff  
+with the probabilistic nature) is its fixed size.
+ 
+Why is a probabilistic data structure useful?
+---------------------------------------------
+- this is a homework question.
+- quick answer,
+  in several cases, if the error rates are sufficiently small, a fixed sized
+  data structure is useful to store and lookup data items.
+  (i) did this stock change value by more than Rs. 50 today?
+      the bloom filter can be added with list of stocks whenever their value
+      changes by Rs. 50.
+  (ii) fixed-size summary of objects in a store, as a summary!
+      here is my bloom filter, that contains all the objects in my cache.
+      a lookup on the filter can be used to query desired object.
+  (iii) insert, delete and lookup can be constant time operations.
+ 
+ 
+the data structure and its operations
+-------------------------------------
+The (binary) bloom filter data structure consists of two components:
+1. a 'm' sized bit array (note: that is a bit array)
+2. 'k' hash functions (with range 0 to m-1)
+ 
+Using these it supports the three functions:
+ 
+- insert(x)  // insert data item 'x' to the filter (assume x to be an int for today’s lab)
+   
+  the 'k' hash functions are applied to item 'x'
+  each hash returns a value between 0 and m-1
+  the return value of hash function is used as an index in the bit array
+  and 'k' of the m bits (one for each index) are set to 1
+ 
+- delete(x)  // delete data item 'x' from the filter
+   
+  the 'k' hash functions are applied to item 'x'
+  each hash returns a value between 0 and m-1
+  the return value of hash function is used as an index in the bit array
+   and 'k' bits (one for each index) are set to 0
+ 
+- lookup(x)  // look up data item 'x' in the filter
+   
+  the 'k' hash functions are applied to item 'x'
+  each hash returns a value between 0 and m-1
+  the return value of hash function is used as an index in the bit array
+  if ALL bits corresponding to the 'k' indices are 1, return TRUE
+ 
+Example:
+--------
+Let k=2;m=10 (s bloom filter with 2 hash functions h1 and h2 with a 10-bit array). 
+Initially, array is set to 00000 00000. 
+Let’s insert x=23 in this data structure. If h1(23)=5 and h2(23)=7. 
+Then the m-bit array becomes 00000 10100. 
+If we do another insertion of x=1 where h1(1)=1 and h2(1)=5, 
+then the m-bit array becomes 01000 10100. 
+For searching x=23 we apply h1(23) and h2(23), to obtain 5 and 7 respectively, 
+and search the 5th and 7th index. Since, at both these indices, the bit is set to 1, 
+therefore 23 is supposedly stored in the filter.
+
+The delete operation is similar. Set the bits at indices h1(x) and h2(x) to 0.
+
+Note:
+1. size of bloom filter does not change with number of inserted items,  
+   remains at 'm' bits.
+2. FALSE POSITIVE - lookup(x) can succeed without 'x' being inserted to the filter 
+   FALSE NEGATIVE lookup(x) can fail even if 'x' was inserted to the filter .
+3. the error rate (false positives and false negatives) is a function of the
+   size of the bloom filter, the number of hash functions and number of items 'n'.
+ 
+Self- study:
+Plot a graph of false positives and false negatives with varying bloom filter size,
+number of hash functions, number of objects etc. (varying one at a time).
+ 
+ 
+Action items
+------------
+1. Implement the binary bloom filter and its operations.
+   The bloom filter state and its operations should be embedded in a C++ class.
+   Note: you may use any data type for the array, but should use all of its bits
+   as part of the filter size (a 32-bit integer will hold 32 bits of the filter).
+ 
+2. The 'k' hash functions should be based on the std::hash{} template function.
+   Define a C++ struct and overload an operator within it to implement the ‘k’ hash functions.
+   Note that the hash functions should follow the logic shown below.
+
+   The first hash function to insert item ‘x’ should be invoked by a call similar to myhash{}(x, 1, m)
+   and the 2nd hash function by myhash{}(x, 2, m) etc. or something silmilar but which passes    
+   the hash function number (ith hash function) as an argument.
+
+   // skeleton for custom hash stand alone function object:  
+   struct myhash  
+   {  
+       // hash for object x, i th hash function, m-sized bit array of filter
+       std::size_t operator()(int const& x, int const& i, int const& m) const  
+       {  
+            // note: this is important and represents the ith hash function
+    std::size_t h = std::hash<std::int>{}(x+i);            
+ 
+           return h                            // note: h should be between 0 and m-1 
+       }
+   };
+ 
+3. Implement a non-bloom filter data structure (possibly using a hash map) that
+   stores all data items in a reliable manner. This will be required to determine false
+   positives and false negatives. You are free to use any C++ STL implementations  
+   for this.
+ 
+4. Follow the input and output formats and verify your implementation using the test cases.
+ 
+Input and output format
+-----------------------
+1. first line has 't' i.e no. of testcases
+2. first line of each testcase will contain "a b" indicating to create
+bloom filter with size of bit array 'a' and no. of hash functions 'b'.
+3. further lines will have these queries:-
+    -> i <n> <n numbers to be inserted>
+    -> d <n> <n numbers to be deleted>
+    -> l <n (number to be looked up)>
+    -> r (report false positive, false negatives and total inserts and delete operations)
+4. last line of each testcase must have only 'e' written on it.
+ 
+Input:
+-----
+
+1         //1 testcase
+10000 5       // create a bloom filter of size 10000 bits with 5 hash functions
+i 5 1 2 3 4 5 // insert 5 elements
+d 3 4 2 1     // delete 3 elements
+l 4           // look up data item 4
+r             // report false positives and false negatives along with number of inserts and deletes
+e    // terminate this testcase
+ 
+Output:
+-------
+l 5 1         // lookup of 5 results in a success
+l 3 0         // look up of 3 was a failure
+r 2 5 23 5    // 2 false positives and 5 false negatives reported with 23 insert and  
+                // 5 delete operations
+
+ 
+Submission format:
+------------------
+   
+   <rollno>_lab7.tar.gz/
+                       bloom_filter.cpp
+                        
+
+

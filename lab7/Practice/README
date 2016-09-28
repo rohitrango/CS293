@@ -1,0 +1,12 @@
+INPUT Format Assumed:
+1.) first line has 't' i.e no. of testcases
+2.) first line of each testcase will contain "a b" indicating to create
+bloom filter with size of bit array 'a' and no. of hash functions 'b'.
+3.) further lines will have these queries:-
+    -> i <n> <n numbers to be inserted>
+    -> d <n> <n numbers to be deleted>
+    -> l <n (number to be looked up)>
+    -> r (report false positive, false negative and total inserts and delete operations)
+4.) last line of each testcase must have only 'e' written on it.
+
+To compile: g++ -std=c++11 bloom_filter.cpp -o bloom_filter

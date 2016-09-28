@@ -66,14 +66,23 @@ void datastore<T>::insert(T val) {
 	else
 		accessCount++;
 	
-	//search if the new list is present
 	count_list* start = head;
-	while(start!=NULL) {
-		if(start->count == accessCount) {
-			countListExists = true;
-			break;
-		}
-		start = start->next;
+	//search if the new list is present
+	// while(start!=NULL) {
+	// 	if(start->count == accessCount) {
+	// 		countListExists = true;
+	// 		break;
+	// 	}
+	// 	start = start->next;
+	// }
+
+	// check if the new list is present ---> map implementation
+	if(listMap.find(accessCount) == listMap.end()) {
+		countListExists = false;
+	}
+	else {
+		countListExists = true;
+		start = listMap[accessCount];
 	}
 
 	if(countListExists) {				//the list with the count exists
@@ -82,20 +91,6 @@ void datastore<T>::insert(T val) {
 		newNode->id = val;
 		newNode->next = start->node;
 		start->node = newNode;
-		// start->num++;
-		// if(node==NULL) {
-		// 	start->node = new item;
-		// 	start->node->id = val;
-		// 	start->node->next = NULL;
-		// }
-		// else {
-		// 	while(node->next != NULL) {
-		// 		node = node->next;
-		// 	}
-		// 	node->next = new item;
-		// 	node->next->id = val;
-		// 	node->next->next = NULL;
-		// }
 	}
 	else {					//the list with the count doesnot exist, make it and add the element to it
 		
@@ -108,6 +103,9 @@ void datastore<T>::insert(T val) {
 			head->node = new item;
 			head->node->id = val;
 			head->node->next = NULL;
+
+			// add the value of the head and its value
+			listMap[accessCount] = head;
 		}
 
 		else {		//head contains atleast one element
@@ -133,6 +131,8 @@ void datastore<T>::insert(T val) {
 				prev->node->id = val;
 				prev->node->next = NULL;
 				head = prev;
+				// map the new list here
+				listMap[accessCount] = head;
 				return;
 			}
 
@@ -145,7 +145,8 @@ void datastore<T>::insert(T val) {
 				nextList->num = 1;
 				nextList->next = NULL;
 				nextList->node = new item;
-
+				// map the element here 
+				listMap[accessCount] = start->next;
 				nextList->node->id = val;
 				nextList->node->next = NULL;
 			}	
@@ -157,6 +158,9 @@ void datastore<T>::insert(T val) {
 				newList->node = new item;
 				newList->node->id = val;
 				newList->node->next = NULL;
+
+				// map the element here
+				listMap[accessCount] = newList;
 
 				newList->next = nextList;
 				start->next = newList;
@@ -171,10 +175,11 @@ int datastore<T>::find_max() {
 	if(head==NULL)
 		return -1;
 	else {
-		count_list* s = head;
-		while(s->next!=NULL) 
-			s = s->next;
-		return s->count;
+		return (listMap.rbegin()->first);
+		// count_list* s = head;
+		// while(s->next!=NULL) 
+		// 	s = s->next;
+		// return s->count;
 	}
 }
 
@@ -184,8 +189,9 @@ void datastore<T>::list_max() {
 		return;
 	else {
 		count_list* s = head;
-		while(s->next!=NULL)
-			s = s->next;
+		s = listMap.rbegin()->second;
+		// while(s->next!=NULL)
+		// 	s = s->next;
 		if(s->node == NULL)
 			return;
 		else {
@@ -212,13 +218,20 @@ void datastore<T>::decrement(T val) {
 	//search for the list
 	bool listExists = false;
 	count_list* start = head;
-	while(start!=NULL) {
-		if(start->count == accessCount) {
-			listExists = true;
-			break;
-		}
-		start = start->next;
+	if(listMap.find(accessCount) == listMap.end())		//not found
+		listExists = false;
+	else {
+		listExists = true;
+		start = listMap[accessCount];
 	}
+
+	// while(start!=NULL) {
+	// 	if(start->count == accessCount) {
+	// 		listExists = true;
+	// 		break;
+	// 	}
+	// 	start = start->next;
+	// }
 
 	if(listExists) {		//list exists, just add it to the list
 		item* newItem = new item;
@@ -307,6 +320,9 @@ int datastore<T>::eject(T val) {
 		else
 			prevList->next = start->next;
 		delete start;
+
+		// delete entry from map
+		listMap.erase(accessCount);
 	}
 
 	return 1;
@@ -345,6 +361,9 @@ void datastore<T>::reset() {
 
 	}
 	start = head->next;
+	//erase everything in the map
+	listMap.clear();
+	listMap[0] = head;
 	head->next = NULL;			//delete the next of head since there are no elements and deallocate memory
 }
 
@@ -366,27 +385,44 @@ void datastore<T>::list_zero() {
 
 template<class T>
 void datastore<T>::list_count(int c) {
-	count_list* start = head;
-	while(start!=NULL) {
-		if(start->count == c) {
-			if(start->num < 1)	//no elements, do nothing
-				return;
+	// count_list* start = head;
+	// while(start!=NULL) {
+	// 	if(start->count == c) {
+	// 		if(start->num < 1)	//no elements, do nothing
+	// 			return;
 
-			item* node = start->node;
-			if(node!=NULL) {
-				cout<<c<<" ";
-			}
-			while(node!=NULL) {
-				cout<<node->id<<" ";
-				node = node->next;
-			}
-			cout<<endl;
+			// item* node = start->node;
+			// if(node!=NULL) {
+			// 	cout<<c<<" ";
+			// }
+			// while(node!=NULL) {
+			// 	cout<<node->id<<" ";
+			// 	node = node->next;
+			// }
+			// cout<<endl;
 
-			return;
+	// 		return;
+	// 	}
+	// 	else {
+	// 		start = start->next;
+	// 	}
+	// }
+	count_list* start;
+	if(listMap.find(c)==listMap.end())
+		return;
+	else {
+		start = listMap[c];
+		item* node = start->node;
+		
+		if(node!=NULL) {
+			cout<<c<<" ";
 		}
-		else {
-			start = start->next;
+		while(node!=NULL) {
+			cout<<node->id<<" ";
+			node = node->next;
 		}
+		cout<<endl;
+
 	}
 }
 

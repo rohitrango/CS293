@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <map>
 using namespace std;
 
 //The datastore template class
@@ -17,9 +18,11 @@ class datastore{
        struct count_list* next; // pointer to next count node
        struct item* node;       // pointer to list of data items
    };
-	
+	 
    struct count_list* head;
 
+   // maps to map the pointer data to their count values / data IDs 
+   map<int,count_list*> listMap;
    // if required add additional private functions here
    void deleteCListUtil(count_list* &);
    void deleteItemUtil(item* &);
